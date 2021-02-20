@@ -1,5 +1,7 @@
 # scripts
 
+Easy way to install and setup my tools for development via cli.
+
 Install rust
 
 ```bash
