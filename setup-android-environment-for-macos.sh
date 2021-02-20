@@ -6,15 +6,17 @@ PLATFORMS_ANDROID_VERSION="platforms;android-30"
 BUILD_TOOLS_VERSION="build-tools;29.0.2"
 ANDROID_SYSTEM_IMAGES_VERSION="system-images;android-30;google_apis;x86_64"
 AVD_NAME="android30"
+JAVA_BIN_LOCATION="/usr/bin/java"
+HOMEBREW_BIN_LOCATION="/usr/local/bin/brew"
 
 download_and_unzip_cmdlinetools() {
-  curl https://dl.google.com/android/repository/${CMDLINE_TOOLS_REPOSITORY} -o $HOME/android-sdk.zip
-  unzip $HOME/android-sdk.zip -d $HOME/.tmp-android
+  command curl https://dl.google.com/android/repository/${CMDLINE_TOOLS_REPOSITORY} -o $HOME/android-sdk.zip
+  command unzip $HOME/android-sdk.zip -d $HOME/.tmp-android
 }
 
 create_directory_android_sdk() {
-  mkdir ~/Library/Android && mkdir ~/Library/Android/sdk && mkdir ~/Library/Android/sdk/cmdline-tools
-  mv $HOME/.tmp-android/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
+  command mkdir ~/Library/Android && mkdir ~/Library/Android/sdk && mkdir ~/Library/Android/sdk/cmdline-tools
+  command mv $HOME/.tmp-android/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
 }
 
 setup_android_environment() {
@@ -23,30 +25,35 @@ setup_android_environment() {
 }
 
 install_sdkmanager_packages() {
-  sdkmanager "platform-tools" ${PLATFORMS_ANDROID_VERSION} ${BUILD_TOOLS_VERSION}
+  command sdkmanager "platform-tools" ${PLATFORMS_ANDROID_VERSION} ${BUILD_TOOLS_VERSION}
 }
 
 install_system_images() {
-  sdkmanager ${ANDROID_SYSTEM_IMAGES_VERSION}
+  command sdkmanager ${ANDROID_SYSTEM_IMAGES_VERSION}
 }
 
 create_avdmanager() {
-  avdmanager create avd --name ${AVD_NAME} --package ${ANDROID_SYSTEM_IMAGES_VERSION}
+  command avdmanager create avd --name ${AVD_NAME} --package ${ANDROID_SYSTEM_IMAGES_VERSION}
 }
 
-if [[ -e "/usr/local/bin/brew" ]]; then
-  echo "✅ brew exists"
-else
+suggest_setup_enviroment() {
+  printf %s "please fill this config tou your .zshrc, .bashrc, or .profile"
+  command cat ./enviroment.txt
+}
+
+if [[ ! -n "$HOMEBREW_BIN_LOCATION" ]]; then
   curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+  command brew --version
 fi
 
-if [[ -e "/usr/bin/java" ]]; then
-  java -version
+if [[ -n "$JAVA_BIN_LOCATION" ]]; then
+  command java -version
 else
+  brew search adoptopenjdk/openjdk/adoptopenjdk8
   brew cask install adoptopenjdk/openjdk/adoptopenjdk8
 fi
 
-if [[ -e "$ANDROID_HOME" ]]; then
+if [[ -n "$ANDROID_HOME" ]]; then
   local ANDROID_HOME
 else
   download_and_unzip_cmdlinetools
@@ -55,4 +62,5 @@ else
   install_sdkmanager_packages
   install_system_images
   create_avdmanager
+  suggest_setup_enviroment
 fi
