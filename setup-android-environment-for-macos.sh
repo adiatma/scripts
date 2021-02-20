@@ -19,7 +19,7 @@ create_directory_android_sdk() {
 
 setup_android_environment() {
   export $ANDROID_HOME
-  echo ${ANDROID_HOME}
+  local ANDROID_HOME
 }
 
 install_sdkmanager_packages() {
@@ -35,9 +35,9 @@ create_avdmanager() {
 }
 
 if [[ -e "/usr/local/bin/brew" ]]; then
-  echo "✅ $(which brew)"
+  echo "✅ brew exists"
 else
-  echo "⚠️  Oops please install brew"
+  curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
 fi
 
 if [[ -e "/usr/bin/java" ]]; then
@@ -47,7 +47,7 @@ else
 fi
 
 if [[ -e "$ANDROID_HOME" ]]; then
-  echo "✅ $ANDROID_HOME"
+  local ANDROID_HOME
 else
   download_and_unzip_cmdlinetools
   create_directory_android_sdk
