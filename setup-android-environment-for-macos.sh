@@ -37,30 +37,59 @@ create_avdmanager() {
 }
 
 suggest_setup_enviroment() {
-  printf %s "please fill this config tou your .zshrc, .bashrc, or .profile"
+  printf %s "please fill this config to your .zshrc, .bashrc, or .profile"
   command cat ./enviroment.txt
 }
 
-if [[ ! -n "$HOMEBREW_BIN_LOCATION" ]]; then
-  curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-  command brew --version
-fi
+install_homebrew() {
+  if [[ ! -n "$HOMEBREW_BIN_LOCATION" ]]; then
+    command curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+    command brew --version
+  fi
+}
 
-if [[ -n "$JAVA_BIN_LOCATION" ]]; then
-  command java -version
-else
-  brew search adoptopenjdk/openjdk/adoptopenjdk8
-  brew cask install adoptopenjdk/openjdk/adoptopenjdk8
-fi
+install_java() {
+  if [[ ! -n "$JAVA_BIN_LOCATION" ]]; then
+    command brew search adoptopenjdk/openjdk/adoptopenjdk8
+    command brew cask install adoptopenjdk/openjdk/adoptopenjdk8
+  fi
+}
 
-if [[ -n "$ANDROID_HOME" ]]; then
-  local ANDROID_HOME
-else
-  download_and_unzip_cmdlinetools
-  create_directory_android_sdk
-  setup_android_environment
-  install_sdkmanager_packages
-  install_system_images
-  create_avdmanager
-  suggest_setup_enviroment
-fi
+install_android() {
+  if [[ ! -n "$ANDROID_HOME" ]]; then
+    download_and_unzip_cmdlinetools
+    create_directory_android_sdk
+    setup_android_environment
+    install_sdkmanager_packages
+    install_system_images
+    create_avdmanager
+    suggest_setup_enviroment
+  fi
+}
+
+check_version() {
+  if [[ -n "$ANDROID_HOME" ]]; then
+    command java -version
+    command echo "sdkmanager $(sdkmanager --version)"
+    command echo "avdmanager $(avdmanager list avd)"
+  fi
+}
+
+install() {
+  install_homebrew
+  install_java
+  install_android
+}
+
+case "$1" in
+  -i | --install)
+    install
+    check_version
+    ;;
+  -v | --version)
+    check_version
+    ;;
+  *)
+    echo "Usage: {(-i | --install), (-v | --version)}"
+    ;;
+esac
